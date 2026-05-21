@@ -9,6 +9,7 @@
 <meta name="apple-mobile-web-app-title" content="English A-Z">
 <title>English A–Z</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<script src="https://code.responsivevoice.org/responsivevoice.js?key=FREE"></script>
 <style>
 :root {
   --bg: #0e0020;
@@ -820,65 +821,30 @@ let totalLearned = 0;
 const totalWords = Object.values(vocab).reduce((s, a) => s + a.length, 0);
 document.getElementById('total-count').textContent = totalWords;
 
-// Speech - iOS Safari compatible
-let synth = window.speechSynthesis;
-let voices = [];
-let speechSupported = !!synth;
-let currentSpeakBtn = null;
-let audioUnlocked = false;
-
-function loadVoices() {
-  voices = synth.getVoices();
-}
-
-if (speechSupported) {
-  loadVoices();
-  if (synth.onvoiceschanged !== undefined) synth.onvoiceschanged = loadVoices;
-  document.getElementById('speech-notice').textContent = '🔊 Toca el botón de sonido para escuchar la pronunciación';
-} else {
-  document.getElementById('speech-notice').textContent = '⚠️ Tu navegador no soporta pronunciación. Usa Safari.';
-}
-
-// iOS Safari requires speech to be triggered on first user interaction
-function unlockAudio() {
-  if (audioUnlocked || !speechSupported) return;
-  const utter = new SpeechSynthesisUtterance('');
-  utter.volume = 0;
-  synth.speak(utter);
-  audioUnlocked = true;
-}
-document.addEventListener('touchstart', unlockAudio, { once: true });
-document.addEventListener('click', unlockAudio, { once: true });
+// Speech using ResponsiveVoice - works on iOS Safari
+document.getElementById('speech-notice').textContent = '🔊 Toca el botón de sonido para escuchar la pronunciación en inglés';
 
 function speak(word, btnEl) {
-  if (!speechSupported) return;
-
-  synth.cancel();
-  if (currentSpeakBtn) currentSpeakBtn.classList.remove('speaking');
-
-  if (voices.length === 0) voices = synth.getVoices();
-
-  const utter = new SpeechSynthesisUtterance(word);
-  utter.lang = 'en-US';
-  utter.rate = 0.82;
-  utter.pitch = 1;
-  utter.volume = 1;
-
-  // Pick best English voice available (iOS voices)
-  const preferred = ['Samantha', 'Karen', 'Daniel', 'Moira', 'Nicky'];
-  let enVoice = voices.find(v => preferred.includes(v.name));
-  if (!enVoice) enVoice = voices.find(v => v.lang === 'en-US');
-  if (!enVoice) enVoice = voices.find(v => v.lang.startsWith('en'));
-  if (enVoice) utter.voice = enVoice;
-
-  btnEl.classList.add('speaking');
-  currentSpeakBtn = btnEl;
-
-  utter.onend = () => { btnEl.classList.remove('speaking'); currentSpeakBtn = null; };
-  utter.onerror = (e) => { btnEl.classList.remove('speaking'); currentSpeakBtn = null; };
-
-  // Small delay needed on iOS Safari
-  setTimeout(() => { synth.speak(utter); }, 100);
+  if (typeof responsiveVoice === 'undefined') {
+    // Fallback to Web Speech API
+    if (!window.speechSynthesis) return;
+    const utter = new SpeechSynthesisUtterance(word);
+    utter.lang = 'en-US';
+    utter.rate = 0.85;
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.speak(utter);
+    return;
+  }
+  responsiveVoice.cancel();
+  if (btnEl) btnEl.classList.add('speaking');
+  responsiveVoice.speak(word, 'US English Female', {
+    rate: 0.9,
+    pitch: 1,
+    volume: 1,
+    onstart: function() { if (btnEl) btnEl.classList.add('speaking'); },
+    onend: function() { if (btnEl) btnEl.classList.remove('speaking'); },
+    onerror: function() { if (btnEl) btnEl.classList.remove('speaking'); }
+  });
 }
 
 function getRevealed(letter) {
