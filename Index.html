@@ -1,0 +1,951 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#1a0533">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="English A-Z">
+<title>English A–Z</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0e0020;
+  --surface: #1a0533;
+  --surface2: #240a44;
+  --accent: #c084fc;
+  --accent2: #f0abfc;
+  --gold: #fbbf24;
+  --text: #f3e8ff;
+  --muted: #a78bca;
+  --card-bg: #1e0a3a;
+  --card-border: #3b1060;
+  --radius: 18px;
+  --radius-sm: 10px;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { height: 100%; font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); overflow: hidden; }
+
+#splash {
+  position: fixed; inset: 0; background: var(--bg);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  z-index: 100; gap: 16px;
+  animation: fadeOut 0.5s ease 1.8s forwards;
+}
+#splash h1 { font-family: 'Syne', sans-serif; font-size: 52px; font-weight: 800; color: var(--accent); letter-spacing: -2px; }
+#splash p { color: var(--muted); font-size: 15px; }
+.splash-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); display: inline-block; animation: bounce 0.8s ease infinite; }
+.splash-dot:nth-child(2) { animation-delay: 0.15s; background: var(--accent2); }
+.splash-dot:nth-child(3) { animation-delay: 0.3s; background: var(--gold); }
+@keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+@keyframes fadeOut { to { opacity:0; pointer-events:none; } }
+
+#app { height: 100dvh; display: flex; flex-direction: column; opacity: 0; animation: fadeIn 0.4s ease 2s forwards; }
+@keyframes fadeIn { to { opacity:1; } }
+
+header { padding: 14px 16px 10px; background: linear-gradient(180deg, var(--surface) 0%, transparent 100%); flex-shrink: 0; }
+.header-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.app-title { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 800; color: var(--accent); letter-spacing: -0.5px; }
+.stats-row { display: flex; gap: 8px; align-items: center; }
+.stats-pill { display: inline-flex; align-items: center; gap: 5px; background: var(--surface2); border: 1px solid var(--card-border); border-radius: 30px; padding: 3px 10px; font-size: 12px; color: var(--muted); }
+.stats-pill span { color: var(--gold); font-weight: 700; font-family: 'Syne', sans-serif; }
+.progress-bar { width: 100%; height: 4px; background: var(--surface2); border-radius: 4px; overflow: hidden; margin-bottom: 10px; }
+.progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--gold)); border-radius: 4px; transition: width 0.4s ease; }
+.letter-scroll { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none; }
+.letter-scroll::-webkit-scrollbar { display: none; }
+.letter-btn { flex-shrink: 0; width: 34px; height: 34px; border-radius: 9px; border: 1.5px solid var(--card-border); background: var(--surface2); color: var(--muted); font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; cursor: pointer; transition: all 0.15s; display: flex; align-items: center; justify-content: center; }
+.letter-btn.active { background: var(--accent); color: #0e0020; border-color: var(--accent); box-shadow: 0 0 14px #c084fc44; }
+.letter-btn.done { border-color: #3b1060; color: var(--gold); }
+
+.section-title { padding: 10px 16px 6px; font-family: 'Syne', sans-serif; font-size: 12px; font-weight: 700; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; flex-shrink: 0; }
+
+.word-grid { flex: 1; overflow-y: auto; padding: 0 12px 16px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; scrollbar-width: none; }
+.word-grid::-webkit-scrollbar { display: none; }
+
+.word-card { background: var(--card-bg); border: 1.5px solid var(--card-border); border-radius: 16px; padding: 12px; cursor: pointer; transition: all 0.2s; position: relative; overflow: hidden; min-height: 110px; display: flex; flex-direction: column; justify-content: space-between; user-select: none; }
+.word-card::before { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, #c084fc08, transparent); opacity: 0; transition: opacity 0.2s; }
+.word-card:active { transform: scale(0.97); }
+.word-card.revealed { border-color: #7e22ce; background: #200640; }
+.word-card.revealed::before { opacity: 1; }
+
+.card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 4px; }
+.card-emoji { font-size: 26px; flex-shrink: 0; }
+.speak-btn { width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--card-border); background: var(--surface2); color: var(--muted); font-size: 13px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.15s; }
+.speak-btn:active { transform: scale(0.9); background: var(--accent); color: #0e0020; }
+.speak-btn.speaking { background: var(--accent); color: #0e0020; animation: pulse 0.6s ease infinite alternate; }
+@keyframes pulse { from { box-shadow: 0 0 0 0 #c084fc44; } to { box-shadow: 0 0 0 6px #c084fc00; } }
+
+.card-word { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; color: var(--text); line-height: 1.2; margin-top: 6px; }
+.card-translation { font-size: 12px; color: var(--accent2); margin-top: 3px; font-weight: 300; font-style: italic; max-height: 0; overflow: hidden; transition: max-height 0.3s ease; }
+.card-example { font-size: 10px; color: var(--muted); margin-top: 4px; line-height: 1.4; max-height: 0; overflow: hidden; transition: max-height 0.3s ease 0.05s; }
+.word-card.revealed .card-translation { max-height: 40px; }
+.word-card.revealed .card-example { max-height: 60px; }
+.card-tap { font-size: 9px; color: var(--muted); margin-top: 6px; opacity: 0.5; }
+.word-card.revealed .card-tap { display: none; }
+.card-check { position: absolute; bottom: 8px; right: 8px; width: 18px; height: 18px; border-radius: 50%; background: var(--gold); display: none; align-items: center; justify-content: center; font-size: 10px; }
+.word-card.revealed .card-check { display: flex; }
+
+.bottom-bar { flex-shrink: 0; padding: 8px 12px 20px; background: linear-gradient(0deg, var(--surface) 0%, transparent 100%); display: flex; gap: 8px; }
+.btn-action { flex: 1; padding: 12px; border-radius: var(--radius-sm); border: 1.5px solid var(--card-border); background: var(--surface2); color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.15s; }
+.btn-action:active { transform: scale(0.97); }
+.btn-primary { background: var(--accent); color: #0e0020; border-color: var(--accent); font-weight: 700; }
+.btn-primary:active { background: #a855f7; }
+
+#toast { position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--gold); color: #0e0020; padding: 9px 18px; border-radius: 30px; font-family: 'Syne', sans-serif; font-weight: 700; font-size: 13px; opacity: 0; transition: all 0.3s; pointer-events: none; white-space: nowrap; z-index: 50; }
+#toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+.speech-notice { font-size: 10px; color: var(--muted); text-align: center; padding: 4px 0 0; opacity: 0.6; flex-shrink: 0; }
+</style>
+</head>
+<body>
+
+<div id="splash">
+  <h1>English A–Z</h1>
+  <p>+1000 palabras · pronunciación incluida</p>
+  <div style="display:flex;gap:6px;margin-top:8px">
+    <div class="splash-dot"></div><div class="splash-dot"></div><div class="splash-dot"></div>
+  </div>
+</div>
+
+<div id="app">
+  <header>
+    <div class="header-top">
+      <div class="app-title">English A–Z</div>
+      <div class="stats-row">
+        <div class="stats-pill">✓ <span id="total-learned">0</span></div>
+        <div class="stats-pill">📚 <span id="total-count">0</span></div>
+      </div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="progress" style="width:4%"></div></div>
+    <div class="letter-scroll" id="letter-nav"></div>
+  </header>
+
+  <div class="section-title" id="section-title">Letra A</div>
+  <div class="word-grid" id="word-grid"></div>
+  <div class="speech-notice" id="speech-notice"></div>
+
+  <div class="bottom-bar">
+    <button class="btn-action" onclick="prevLetter()">← Anterior</button>
+    <button class="btn-action btn-primary" onclick="nextLetter()">Siguiente →</button>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+const vocab = {
+  A: [
+    {word:"Apple",es:"Manzana",emoji:"🍎",ex:"I eat an apple every day."},
+    {word:"Arm",es:"Brazo",emoji:"💪",ex:"My arm is strong."},
+    {word:"Ant",es:"Hormiga",emoji:"🐜",ex:"The ant is very small."},
+    {word:"Air",es:"Aire",emoji:"💨",ex:"The air is fresh."},
+    {word:"Angel",es:"Ángel",emoji:"😇",ex:"She is like an angel."},
+    {word:"Airplane",es:"Avión",emoji:"✈️",ex:"The airplane flies high."},
+    {word:"Arrow",es:"Flecha",emoji:"🏹",ex:"The arrow hits the target."},
+    {word:"Autumn",es:"Otoño",emoji:"🍂",ex:"I love autumn colors."},
+    {word:"Ambulance",es:"Ambulancia",emoji:"🚑",ex:"Call an ambulance!"},
+    {word:"Anchor",es:"Ancla",emoji:"⚓",ex:"The anchor holds the boat."},
+    {word:"Avocado",es:"Aguacate",emoji:"🥑",ex:"Avocado is delicious."},
+    {word:"Alarm",es:"Alarma / Despertador",emoji:"⏰",ex:"My alarm rings at 7 am."},
+    {word:"Athlete",es:"Atleta",emoji:"🏃",ex:"She is a professional athlete."},
+    {word:"Art",es:"Arte",emoji:"🎨",ex:"I love modern art."},
+    {word:"Axe",es:"Hacha",emoji:"🪓",ex:"He cuts wood with an axe."},
+    {word:"Address",es:"Dirección",emoji:"📍",ex:"What is your address?"},
+    {word:"Angry",es:"Enojado / Enfadado",emoji:"😠",ex:"He is angry today."},
+    {word:"Answer",es:"Respuesta",emoji:"💬",ex:"Do you know the answer?"},
+    {word:"Apartment",es:"Apartamento",emoji:"🏠",ex:"I live in an apartment."},
+    {word:"April",es:"Abril",emoji:"🌸",ex:"April is a spring month."},
+    {word:"Apron",es:"Delantal",emoji:"🧑‍🍳",ex:"Wear an apron to cook."},
+    {word:"Armchair",es:"Sillón",emoji:"🪑",ex:"He sits in the armchair."},
+    {word:"Astronaut",es:"Astronauta",emoji:"👨‍🚀",ex:"The astronaut went to space."},
+    {word:"Audience",es:"Público / Audiencia",emoji:"👥",ex:"The audience clapped loudly."},
+    {word:"August",es:"Agosto",emoji:"☀️",ex:"August is very hot."},
+    {word:"Aunt",es:"Tía",emoji:"👩",ex:"My aunt bakes great cakes."},
+    {word:"Avenue",es:"Avenida",emoji:"🛣️",ex:"I live on Fifth Avenue."},
+    {word:"Award",es:"Premio",emoji:"🏆",ex:"She won an award."},
+    {word:"Awful",es:"Horrible / Terrible",emoji:"😱",ex:"The weather is awful today."},
+    {word:"Awesome",es:"Genial / Increíble",emoji:"🤩",ex:"This movie is awesome!"},
+  ],
+  B: [
+    {word:"Ball",es:"Pelota",emoji:"⚽",ex:"I kick the ball."},
+    {word:"Book",es:"Libro",emoji:"📚",ex:"This book is interesting."},
+    {word:"Bird",es:"Pájaro",emoji:"🐦",ex:"The bird sings."},
+    {word:"Baby",es:"Bebé",emoji:"👶",ex:"The baby is sleeping."},
+    {word:"Bag",es:"Bolso / Bolsa",emoji:"👜",ex:"I carry a bag."},
+    {word:"Banana",es:"Plátano",emoji:"🍌",ex:"I like bananas."},
+    {word:"Bread",es:"Pan",emoji:"🍞",ex:"I eat bread for breakfast."},
+    {word:"Beach",es:"Playa",emoji:"🏖️",ex:"We go to the beach in summer."},
+    {word:"Boat",es:"Barco / Barca",emoji:"⛵",ex:"The boat sails on the sea."},
+    {word:"Butterfly",es:"Mariposa",emoji:"🦋",ex:"The butterfly is colorful."},
+    {word:"Bottle",es:"Botella",emoji:"🍶",ex:"Fill the bottle with water."},
+    {word:"Bridge",es:"Puente",emoji:"🌉",ex:"We cross the bridge."},
+    {word:"Bear",es:"Oso",emoji:"🐻",ex:"The bear lives in the forest."},
+    {word:"Bed",es:"Cama",emoji:"🛏️",ex:"I sleep in my bed."},
+    {word:"Bus",es:"Autobús",emoji:"🚌",ex:"I take the bus to school."},
+    {word:"Balloon",es:"Globo",emoji:"🎈",ex:"The balloon floats up."},
+    {word:"Bathroom",es:"Baño",emoji:"🚿",ex:"The bathroom is clean."},
+    {word:"Battery",es:"Batería / Pila",emoji:"🔋",ex:"My phone needs a battery."},
+    {word:"Bell",es:"Campana",emoji:"🔔",ex:"The bell rings at noon."},
+    {word:"Belt",es:"Cinturón",emoji:"👔",ex:"Wear a belt with your pants."},
+    {word:"Bicycle",es:"Bicicleta",emoji:"🚲",ex:"I ride my bicycle to school."},
+    {word:"Blanket",es:"Manta",emoji:"🛏️",ex:"The blanket is warm."},
+    {word:"Bone",es:"Hueso",emoji:"🦴",ex:"The dog chews the bone."},
+    {word:"Boot",es:"Bota",emoji:"👢",ex:"Wear boots in the rain."},
+    {word:"Broom",es:"Escoba",emoji:"🧹",ex:"Sweep with a broom."},
+    {word:"Brother",es:"Hermano",emoji:"👦",ex:"My brother is tall."},
+    {word:"Bucket",es:"Cubo",emoji:"🪣",ex:"Fill the bucket with water."},
+    {word:"Burger",es:"Hamburguesa",emoji:"🍔",ex:"I want a burger with fries."},
+    {word:"Butter",es:"Mantequilla",emoji:"🧈",ex:"Put butter on the bread."},
+    {word:"Button",es:"Botón",emoji:"🔘",ex:"Press the button."},
+  ],
+  C: [
+    {word:"Cat",es:"Gato",emoji:"🐱",ex:"The cat is sleeping."},
+    {word:"Car",es:"Coche",emoji:"🚗",ex:"My car is red."},
+    {word:"Cup",es:"Taza",emoji:"☕",ex:"I drink from a cup."},
+    {word:"Cloud",es:"Nube",emoji:"☁️",ex:"The cloud is white."},
+    {word:"Chair",es:"Silla",emoji:"🪑",ex:"Sit on the chair."},
+    {word:"Clock",es:"Reloj",emoji:"🕐",ex:"Look at the clock."},
+    {word:"Cake",es:"Pastel / Tarta",emoji:"🎂",ex:"Happy birthday cake!"},
+    {word:"Camera",es:"Cámara",emoji:"📷",ex:"Take a photo with the camera."},
+    {word:"Castle",es:"Castillo",emoji:"🏰",ex:"The castle is very old."},
+    {word:"Candle",es:"Vela",emoji:"🕯️",ex:"The candle gives light."},
+    {word:"Cheese",es:"Queso",emoji:"🧀",ex:"I love cheese on pizza."},
+    {word:"Chicken",es:"Pollo",emoji:"🐔",ex:"The chicken lays eggs."},
+    {word:"Coin",es:"Moneda",emoji:"🪙",ex:"I found a coin on the floor."},
+    {word:"Coat",es:"Abrigo",emoji:"🧥",ex:"Wear your coat in winter."},
+    {word:"Computer",es:"Ordenador",emoji:"💻",ex:"I work on my computer."},
+    {word:"Calendar",es:"Calendario",emoji:"📅",ex:"Check the calendar."},
+    {word:"Canoe",es:"Canoa",emoji:"🛶",ex:"We paddle the canoe."},
+    {word:"Cap",es:"Gorra",emoji:"🧢",ex:"He wears a cap."},
+    {word:"Card",es:"Tarjeta",emoji:"💳",ex:"Pay with your card."},
+    {word:"Carrot",es:"Zanahoria",emoji:"🥕",ex:"Rabbits love carrots."},
+    {word:"Cave",es:"Cueva",emoji:"🏔️",ex:"The bear lives in a cave."},
+    {word:"Cherry",es:"Cereza",emoji:"🍒",ex:"Cherries are small and red."},
+    {word:"Child",es:"Niño/a",emoji:"👧",ex:"The child is playing."},
+    {word:"Circle",es:"Círculo",emoji:"⭕",ex:"Draw a circle."},
+    {word:"City",es:"Ciudad",emoji:"🏙️",ex:"I live in a big city."},
+    {word:"Classroom",es:"Aula / Clase",emoji:"🏫",ex:"The classroom is quiet."},
+    {word:"Cloud",es:"Nube",emoji:"☁️",ex:"The clouds are dark."},
+    {word:"Coffee",es:"Café",emoji:"☕",ex:"I drink coffee in the morning."},
+    {word:"Cold",es:"Frío",emoji:"🥶",ex:"It is cold outside."},
+    {word:"Cook",es:"Cocinar / Cocinero",emoji:"👨‍🍳",ex:"I love to cook."},
+  ],
+  D: [
+    {word:"Dog",es:"Perro",emoji:"🐶",ex:"The dog is happy."},
+    {word:"Door",es:"Puerta",emoji:"🚪",ex:"Open the door, please."},
+    {word:"Duck",es:"Pato",emoji:"🦆",ex:"The duck swims."},
+    {word:"Desk",es:"Escritorio",emoji:"🖥️",ex:"I study at my desk."},
+    {word:"Day",es:"Día",emoji:"🌤️",ex:"Today is a nice day."},
+    {word:"Dance",es:"Bailar",emoji:"💃",ex:"I love to dance."},
+    {word:"Diamond",es:"Diamante",emoji:"💎",ex:"The diamond is shiny."},
+    {word:"Dolphin",es:"Delfín",emoji:"🐬",ex:"The dolphin is intelligent."},
+    {word:"Dragon",es:"Dragón",emoji:"🐉",ex:"The dragon breathes fire."},
+    {word:"Dream",es:"Sueño",emoji:"💭",ex:"I had a nice dream."},
+    {word:"Dress",es:"Vestido",emoji:"👗",ex:"She wears a red dress."},
+    {word:"Drum",es:"Tambor",emoji:"🥁",ex:"He plays the drum."},
+    {word:"Desert",es:"Desierto",emoji:"🏜️",ex:"The desert is very hot."},
+    {word:"Deer",es:"Ciervo",emoji:"🦌",ex:"The deer runs in the forest."},
+    {word:"Doctor",es:"Médico/a",emoji:"👨‍⚕️",ex:"The doctor helps sick people."},
+    {word:"Diary",es:"Diario",emoji:"📔",ex:"I write in my diary every night."},
+    {word:"Dice",es:"Dado",emoji:"🎲",ex:"Roll the dice."},
+    {word:"Dinner",es:"Cena",emoji:"🍽️",ex:"We have dinner at eight."},
+    {word:"Dirty",es:"Sucio/a",emoji:"🧹",ex:"The floor is dirty."},
+    {word:"Dish",es:"Plato / Fuente",emoji:"🍽️",ex:"Wash the dish."},
+    {word:"Doll",es:"Muñeca",emoji:"🪆",ex:"The girl plays with her doll."},
+    {word:"Donkey",es:"Burro",emoji:"🫏",ex:"The donkey carries heavy loads."},
+    {word:"Download",es:"Descargar",emoji:"⬇️",ex:"Download the app."},
+    {word:"Drawer",es:"Cajón",emoji:"🗄️",ex:"The keys are in the drawer."},
+    {word:"Drink",es:"Beber / Bebida",emoji:"🥤",ex:"Drink a glass of water."},
+    {word:"Driver",es:"Conductor/a",emoji:"🚗",ex:"The driver is careful."},
+    {word:"Drop",es:"Gota / Dejar caer",emoji:"💧",ex:"A drop of water."},
+    {word:"Dry",es:"Seco/a",emoji:"🌵",ex:"The towel is dry."},
+    {word:"Dust",es:"Polvo",emoji:"🌫️",ex:"There is dust on the shelf."},
+    {word:"Dusk",es:"Anochecer",emoji:"🌇",ex:"The sky is orange at dusk."},
+  ],
+  E: [
+    {word:"Egg",es:"Huevo",emoji:"🥚",ex:"I eat an egg for breakfast."},
+    {word:"Eye",es:"Ojo",emoji:"👁️",ex:"My eyes are brown."},
+    {word:"Ear",es:"Oreja",emoji:"👂",ex:"I hear with my ear."},
+    {word:"Earth",es:"Tierra",emoji:"🌍",ex:"The Earth is our home."},
+    {word:"Elephant",es:"Elefante",emoji:"🐘",ex:"The elephant is big."},
+    {word:"Evening",es:"Tarde / Noche",emoji:"🌆",ex:"Good evening!"},
+    {word:"Eagle",es:"Águila",emoji:"🦅",ex:"The eagle flies very high."},
+    {word:"Engine",es:"Motor",emoji:"⚙️",ex:"The engine is very powerful."},
+    {word:"Envelope",es:"Sobre",emoji:"✉️",ex:"Put the letter in the envelope."},
+    {word:"Elbow",es:"Codo",emoji:"💪",ex:"My elbow hurts."},
+    {word:"Energy",es:"Energía",emoji:"⚡",ex:"I need more energy today."},
+    {word:"Exit",es:"Salida",emoji:"🚪",ex:"Where is the exit?"},
+    {word:"Eraser",es:"Goma de borrar",emoji:"✏️",ex:"Use the eraser to fix your mistake."},
+    {word:"Explore",es:"Explorar",emoji:"🧭",ex:"I love to explore new places."},
+    {word:"Expert",es:"Experto/a",emoji:"🏅",ex:"She is an expert in cooking."},
+    {word:"Elevator",es:"Ascensor",emoji:"🛗",ex:"Take the elevator to the fifth floor."},
+    {word:"Emergency",es:"Emergencia",emoji:"🚨",ex:"Call 112 in an emergency."},
+    {word:"Empty",es:"Vacío/a",emoji:"📭",ex:"The bottle is empty."},
+    {word:"Enjoy",es:"Disfrutar",emoji:"😊",ex:"Enjoy your meal!"},
+    {word:"Exam",es:"Examen",emoji:"📝",ex:"I have an exam tomorrow."},
+    {word:"Exchange",es:"Intercambio / Cambiar",emoji:"🔄",ex:"Can we exchange seats?"},
+    {word:"Exercise",es:"Ejercicio",emoji:"🏋️",ex:"Exercise is good for your health."},
+    {word:"Expensive",es:"Caro/a",emoji:"💸",ex:"This coat is very expensive."},
+    {word:"Experience",es:"Experiencia",emoji:"🌟",ex:"She has a lot of experience."},
+  ],
+  F: [
+    {word:"Fish",es:"Pez / Pescado",emoji:"🐟",ex:"The fish swims fast."},
+    {word:"Flower",es:"Flor",emoji:"🌸",ex:"The flower is beautiful."},
+    {word:"Fire",es:"Fuego",emoji:"🔥",ex:"Fire is hot."},
+    {word:"Family",es:"Familia",emoji:"👨‍👩‍👧",ex:"I love my family."},
+    {word:"Food",es:"Comida",emoji:"🍽️",ex:"The food is delicious."},
+    {word:"Friend",es:"Amigo/a",emoji:"🤝",ex:"She is my best friend."},
+    {word:"Flag",es:"Bandera",emoji:"🚩",ex:"Each country has a flag."},
+    {word:"Fork",es:"Tenedor",emoji:"🍴",ex:"Use a fork to eat."},
+    {word:"Forest",es:"Bosque",emoji:"🌲",ex:"The forest is full of trees."},
+    {word:"Frog",es:"Rana",emoji:"🐸",ex:"The frog jumps."},
+    {word:"Fruit",es:"Fruta",emoji:"🍓",ex:"Eat fruit every day."},
+    {word:"Football",es:"Fútbol",emoji:"⚽",ex:"I play football on weekends."},
+    {word:"Fox",es:"Zorro",emoji:"🦊",ex:"The fox is clever."},
+    {word:"Farm",es:"Granja",emoji:"🚜",ex:"We visited a farm."},
+    {word:"Finger",es:"Dedo",emoji:"☝️",ex:"I cut my finger."},
+    {word:"Face",es:"Cara",emoji:"😊",ex:"She has a kind face."},
+    {word:"Factory",es:"Fábrica",emoji:"🏭",ex:"The factory makes cars."},
+    {word:"Fall",es:"Caer / Otoño",emoji:"🍂",ex:"Leaves fall in autumn."},
+    {word:"Father",es:"Padre",emoji:"👨",ex:"My father is a doctor."},
+    {word:"Feather",es:"Pluma",emoji:"🪶",ex:"The bird has soft feathers."},
+    {word:"February",es:"Febrero",emoji:"💝",ex:"February is the shortest month."},
+    {word:"Fence",es:"Valla / Cerca",emoji:"🚧",ex:"The dog jumped over the fence."},
+    {word:"Festival",es:"Festival",emoji:"🎉",ex:"We love the music festival."},
+    {word:"Fever",es:"Fiebre",emoji:"🤒",ex:"She has a fever."},
+    {word:"Field",es:"Campo",emoji:"🌾",ex:"We play in the field."},
+    {word:"Flame",es:"Llama",emoji:"🔥",ex:"The flame burned bright."},
+    {word:"Flash",es:"Destello / Flash",emoji:"⚡",ex:"A flash of lightning."},
+    {word:"Floor",es:"Suelo / Piso",emoji:"🏠",ex:"The floor is clean."},
+    {word:"Fog",es:"Niebla",emoji:"🌫️",ex:"There is thick fog today."},
+    {word:"Foot",es:"Pie",emoji:"🦶",ex:"My foot hurts."},
+  ],
+  G: [
+    {word:"Girl",es:"Niña / Chica",emoji:"👧",ex:"The girl is happy."},
+    {word:"Garden",es:"Jardín",emoji:"🌿",ex:"I water the garden."},
+    {word:"Glass",es:"Vaso / Vidrio",emoji:"🥛",ex:"Give me a glass of water."},
+    {word:"Grape",es:"Uva",emoji:"🍇",ex:"Grapes are sweet."},
+    {word:"Gift",es:"Regalo",emoji:"🎁",ex:"I received a gift."},
+    {word:"Guitar",es:"Guitarra",emoji:"🎸",ex:"I play the guitar."},
+    {word:"Globe",es:"Globo terráqueo",emoji:"🌐",ex:"The globe shows all countries."},
+    {word:"Gloves",es:"Guantes",emoji:"🧤",ex:"Wear gloves in winter."},
+    {word:"Gorilla",es:"Gorila",emoji:"🦍",ex:"The gorilla is strong."},
+    {word:"Grass",es:"Hierba / Césped",emoji:"🌱",ex:"The grass is green."},
+    {word:"Gold",es:"Oro",emoji:"🥇",ex:"Gold is very valuable."},
+    {word:"Gym",es:"Gimnasio",emoji:"🏋️",ex:"I go to the gym every day."},
+    {word:"Ghost",es:"Fantasma",emoji:"👻",ex:"The ghost is scary."},
+    {word:"Gate",es:"Puerta / Verja",emoji:"🚧",ex:"Open the gate."},
+    {word:"Giraffe",es:"Jirafa",emoji:"🦒",ex:"The giraffe has a long neck."},
+    {word:"Game",es:"Juego",emoji:"🎮",ex:"Let's play a game."},
+    {word:"Garbage",es:"Basura",emoji:"🗑️",ex:"Throw the garbage away."},
+    {word:"Gas",es:"Gas / Gasolina",emoji:"⛽",ex:"The car needs gas."},
+    {word:"Glue",es:"Pegamento / Cola",emoji:"🧴",ex:"Use glue to fix it."},
+    {word:"Goal",es:"Gol / Meta / Objetivo",emoji:"🥅",ex:"He scored a goal!"},
+    {word:"Goat",es:"Cabra",emoji:"🐐",ex:"The goat climbs mountains."},
+    {word:"Good",es:"Bueno/a",emoji:"👍",ex:"You did a good job!"},
+    {word:"Grandfather",es:"Abuelo",emoji:"👴",ex:"My grandfather tells stories."},
+    {word:"Grandmother",es:"Abuela",emoji:"👵",ex:"My grandmother cooks well."},
+    {word:"Green",es:"Verde",emoji:"💚",ex:"The grass is green."},
+    {word:"Group",es:"Grupo",emoji:"👥",ex:"Work in a group."},
+    {word:"Grow",es:"Crecer",emoji:"🌱",ex:"Plants grow in sunlight."},
+    {word:"Guide",es:"Guía",emoji:"🗺️",ex:"The guide shows us the city."},
+    {word:"Gulf",es:"Golfo",emoji:"🌊",ex:"The Gulf of Mexico is warm."},
+    {word:"Gym",es:"Gimnasio",emoji:"🏋️",ex:"I exercise at the gym."},
+  ],
+  H: [
+    {word:"House",es:"Casa",emoji:"🏠",ex:"My house is big."},
+    {word:"Hand",es:"Mano",emoji:"✋",ex:"Wash your hands."},
+    {word:"Hat",es:"Sombrero",emoji:"🎩",ex:"He wears a hat."},
+    {word:"Horse",es:"Caballo",emoji:"🐴",ex:"The horse runs fast."},
+    {word:"Heart",es:"Corazón",emoji:"❤️",ex:"I love with my heart."},
+    {word:"Honey",es:"Miel",emoji:"🍯",ex:"Honey is sweet."},
+    {word:"Hammer",es:"Martillo",emoji:"🔨",ex:"Hit the nail with a hammer."},
+    {word:"Helmet",es:"Casco",emoji:"⛑️",ex:"Wear a helmet on your bike."},
+    {word:"Hospital",es:"Hospital",emoji:"🏥",ex:"The hospital is near."},
+    {word:"Hotel",es:"Hotel",emoji:"🏨",ex:"We stay at a hotel."},
+    {word:"Hungry",es:"Hambriento/a",emoji:"😋",ex:"I am very hungry."},
+    {word:"Hippo",es:"Hipopótamo",emoji:"🦛",ex:"The hippo lives near rivers."},
+    {word:"Helicopter",es:"Helicóptero",emoji:"🚁",ex:"The helicopter flies low."},
+    {word:"Hill",es:"Colina",emoji:"⛰️",ex:"We walked up the hill."},
+    {word:"Homework",es:"Tarea / Deberes",emoji:"📝",ex:"I do my homework after school."},
+    {word:"Hair",es:"Pelo / Cabello",emoji:"💇",ex:"She has long hair."},
+    {word:"Happy",es:"Feliz",emoji:"😊",ex:"I am very happy today."},
+    {word:"Harbor",es:"Puerto",emoji:"⚓",ex:"The ship is in the harbor."},
+    {word:"Harvest",es:"Cosecha",emoji:"🌾",ex:"We harvest wheat in summer."},
+    {word:"Head",es:"Cabeza",emoji:"🗣️",ex:"My head hurts."},
+    {word:"Headphones",es:"Auriculares",emoji:"🎧",ex:"I listen with headphones."},
+    {word:"Healthy",es:"Sano/a / Saludable",emoji:"🥗",ex:"Eating well keeps you healthy."},
+    {word:"Heavy",es:"Pesado/a",emoji:"🏋️",ex:"This box is very heavy."},
+    {word:"Hide",es:"Esconder / Esconderse",emoji:"🙈",ex:"Let's hide and seek."},
+    {word:"High",es:"Alto/a",emoji:"📈",ex:"The mountain is very high."},
+    {word:"History",es:"Historia",emoji:"📜",ex:"I love studying history."},
+    {word:"Home",es:"Hogar",emoji:"🏡",ex:"There's no place like home."},
+    {word:"Hook",es:"Gancho",emoji:"🪝",ex:"Hang the coat on the hook."},
+    {word:"Hot",es:"Caliente / Caluroso",emoji:"🌡️",ex:"The soup is hot."},
+    {word:"Hour",es:"Hora",emoji:"🕐",ex:"Wait one hour."},
+  ],
+  I: [
+    {word:"Ice",es:"Hielo",emoji:"🧊",ex:"Ice is very cold."},
+    {word:"Island",es:"Isla",emoji:"🏝️",ex:"The island is beautiful."},
+    {word:"Igloo",es:"Iglú",emoji:"🏔️",ex:"An igloo is made of ice."},
+    {word:"Iron",es:"Hierro / Plancha",emoji:"🧲",ex:"Iron is a metal."},
+    {word:"Insect",es:"Insecto",emoji:"🐛",ex:"The insect is small."},
+    {word:"Ink",es:"Tinta",emoji:"🖊️",ex:"The pen has black ink."},
+    {word:"Invite",es:"Invitar",emoji:"💌",ex:"I invite you to my party."},
+    {word:"Instrument",es:"Instrumento",emoji:"🎺",ex:"A guitar is an instrument."},
+    {word:"Idea",es:"Idea",emoji:"💡",ex:"I have a great idea!"},
+    {word:"Ice cream",es:"Helado",emoji:"🍦",ex:"I love chocolate ice cream."},
+    {word:"Important",es:"Importante",emoji:"❗",ex:"This is very important."},
+    {word:"Illness",es:"Enfermedad",emoji:"🤒",ex:"She has an illness."},
+    {word:"Interview",es:"Entrevista",emoji:"🎤",ex:"He has a job interview today."},
+    {word:"Impossible",es:"Imposible",emoji:"🚫",ex:"Nothing is impossible."},
+    {word:"Improve",es:"Mejorar",emoji:"📈",ex:"I want to improve my English."},
+    {word:"Incredible",es:"Increíble",emoji:"🤩",ex:"The view is incredible."},
+    {word:"Inform",es:"Informar",emoji:"📢",ex:"Please inform me of changes."},
+    {word:"Interesting",es:"Interesante",emoji:"🤔",ex:"This book is very interesting."},
+    {word:"International",es:"Internacional",emoji:"🌐",ex:"She has an international career."},
+    {word:"Internet",es:"Internet",emoji:"🌐",ex:"I use the internet every day."},
+  ],
+  J: [
+    {word:"Juice",es:"Zumo / Jugo",emoji:"🧃",ex:"I drink orange juice."},
+    {word:"Jacket",es:"Chaqueta",emoji:"🧥",ex:"Wear your jacket!"},
+    {word:"Jar",es:"Tarro / Frasco",emoji:"🫙",ex:"The jar is full of honey."},
+    {word:"Jump",es:"Saltar",emoji:"🏃",ex:"Children love to jump."},
+    {word:"Jellyfish",es:"Medusa",emoji:"🪼",ex:"The jellyfish is in the sea."},
+    {word:"Joy",es:"Alegría",emoji:"😄",ex:"Music brings me joy."},
+    {word:"Jungle",es:"Selva / Jungla",emoji:"🌴",ex:"Many animals live in the jungle."},
+    {word:"Judge",es:"Juez",emoji:"⚖️",ex:"The judge makes decisions."},
+    {word:"Jewel",es:"Joya",emoji:"💍",ex:"The jewel is very expensive."},
+    {word:"Journey",es:"Viaje",emoji:"🗺️",ex:"We began our journey early."},
+    {word:"Jeans",es:"Vaqueros",emoji:"👖",ex:"I wear jeans every day."},
+    {word:"Jet",es:"Avión a reacción",emoji:"✈️",ex:"The jet is very fast."},
+    {word:"January",es:"Enero",emoji:"❄️",ex:"January is cold."},
+    {word:"Job",es:"Trabajo / Empleo",emoji:"💼",ex:"I love my job."},
+    {word:"Joker",es:"Bromista / Comodín",emoji:"🃏",ex:"He is always the joker."},
+    {word:"Journal",es:"Diario / Revista",emoji:"📓",ex:"I write in my journal daily."},
+    {word:"Junior",es:"Junior / Joven",emoji:"👦",ex:"He is in the junior team."},
+    {word:"Junk",es:"Basura / Chatarra",emoji:"🗑️",ex:"Throw away the junk."},
+    {word:"Just",es:"Solo / Justo",emoji:"⚖️",ex:"I just arrived."},
+  ],
+  K: [
+    {word:"Key",es:"Llave",emoji:"🔑",ex:"I lost my key."},
+    {word:"King",es:"Rey",emoji:"👑",ex:"The king is noble."},
+    {word:"Kitchen",es:"Cocina",emoji:"🍳",ex:"I cook in the kitchen."},
+    {word:"Kitten",es:"Gatito",emoji:"🐱",ex:"The kitten is cute."},
+    {word:"Knee",es:"Rodilla",emoji:"🦵",ex:"My knee hurts."},
+    {word:"Kite",es:"Cometa",emoji:"🪁",ex:"I fly a kite in the park."},
+    {word:"Kangaroo",es:"Canguro",emoji:"🦘",ex:"The kangaroo has a pouch."},
+    {word:"Knife",es:"Cuchillo",emoji:"🔪",ex:"Cut the bread with a knife."},
+    {word:"Knowledge",es:"Conocimiento",emoji:"🧠",ex:"Knowledge is power."},
+    {word:"Kind",es:"Amable / Bondadoso",emoji:"😊",ex:"She is very kind to everyone."},
+    {word:"Keyboard",es:"Teclado",emoji:"⌨️",ex:"I type on the keyboard."},
+    {word:"Koala",es:"Koala",emoji:"🐨",ex:"The koala sleeps a lot."},
+    {word:"Kick",es:"Patear / Patada",emoji:"🦵",ex:"Kick the ball hard."},
+    {word:"Kid",es:"Niño/a / Chico/a",emoji:"🧒",ex:"Every kid loves to play."},
+    {word:"Kilogram",es:"Kilogramo",emoji:"⚖️",ex:"I weigh 70 kilograms."},
+    {word:"Kiwi",es:"Kiwi",emoji:"🥝",ex:"The kiwi is green inside."},
+    {word:"Kneel",es:"Arrodillarse",emoji:"🙏",ex:"Kneel down to pray."},
+    {word:"Knit",es:"Tejer",emoji:"🧶",ex:"My grandmother loves to knit."},
+    {word:"Knock",es:"Llamar / Golpear",emoji:"🚪",ex:"Knock on the door before entering."},
+  ],
+  L: [
+    {word:"Lion",es:"León",emoji:"🦁",ex:"The lion is the king of the jungle."},
+    {word:"Lemon",es:"Limón",emoji:"🍋",ex:"The lemon is sour."},
+    {word:"Leaf",es:"Hoja",emoji:"🍃",ex:"The leaf is green."},
+    {word:"Lamp",es:"Lámpara",emoji:"💡",ex:"Turn on the lamp."},
+    {word:"Love",es:"Amor",emoji:"💕",ex:"I love my family."},
+    {word:"Lake",es:"Lago",emoji:"🏞️",ex:"We swim in the lake."},
+    {word:"Ladder",es:"Escalera de mano",emoji:"🪜",ex:"Climb up the ladder."},
+    {word:"Leg",es:"Pierna",emoji:"🦵",ex:"My legs are tired."},
+    {word:"Letter",es:"Carta / Letra",emoji:"✉️",ex:"I write a letter to my friend."},
+    {word:"Library",es:"Biblioteca",emoji:"📚",ex:"I read books at the library."},
+    {word:"Lighthouse",es:"Faro",emoji:"🗼",ex:"The lighthouse guides ships."},
+    {word:"Lobster",es:"Langosta",emoji:"🦞",ex:"The lobster lives in the sea."},
+    {word:"Lunch",es:"Almuerzo",emoji:"🥗",ex:"I eat lunch at noon."},
+    {word:"Luggage",es:"Equipaje",emoji:"🧳",ex:"Pack your luggage for the trip."},
+    {word:"Lightning",es:"Rayo / Relámpago",emoji:"⚡",ex:"The lightning lit up the sky."},
+    {word:"Laugh",es:"Reír",emoji:"😂",ex:"She laughs every day."},
+    {word:"Lazy",es:"Perezoso/a",emoji:"😴",ex:"Don't be lazy!"},
+    {word:"Learn",es:"Aprender",emoji:"📖",ex:"I want to learn English."},
+    {word:"Left",es:"Izquierda",emoji:"⬅️",ex:"Turn left at the corner."},
+    {word:"Lemon",es:"Limón",emoji:"🍋",ex:"This lemonade needs more lemon."},
+    {word:"Light",es:"Luz / Ligero",emoji:"💡",ex:"Turn on the light."},
+    {word:"List",es:"Lista",emoji:"📋",ex:"Make a shopping list."},
+    {word:"Lock",es:"Cerradura / Cerrar con llave",emoji:"🔒",ex:"Lock the door at night."},
+    {word:"Long",es:"Largo/a",emoji:"📏",ex:"The road is very long."},
+    {word:"Look",es:"Mirar",emoji:"👀",ex:"Look at that bird!"},
+    {word:"Lose",es:"Perder",emoji:"😢",ex:"I don't want to lose."},
+    {word:"Loud",es:"Ruidoso / Alto (volumen)",emoji:"📢",ex:"The music is too loud."},
+    {word:"Lucky",es:"Afortunado/a",emoji:"🍀",ex:"I feel lucky today."},
+    {word:"Luggage",es:"Equipaje",emoji:"🧳",ex:"Your luggage is heavy."},
+    {word:"Lyric",es:"Letra de canción",emoji:"🎵",ex:"I know all the lyrics."},
+  ],
+  M: [
+    {word:"Moon",es:"Luna",emoji:"🌙",ex:"The moon is bright."},
+    {word:"Monkey",es:"Mono",emoji:"🐒",ex:"The monkey climbs trees."},
+    {word:"Milk",es:"Leche",emoji:"🥛",ex:"I drink milk every morning."},
+    {word:"Map",es:"Mapa",emoji:"🗺️",ex:"Use the map to find the way."},
+    {word:"Mountain",es:"Montaña",emoji:"⛰️",ex:"The mountain is very high."},
+    {word:"Music",es:"Música",emoji:"🎵",ex:"I listen to music every day."},
+    {word:"Mirror",es:"Espejo",emoji:"🪞",ex:"Look in the mirror."},
+    {word:"Mouse",es:"Ratón",emoji:"🐭",ex:"The mouse is small."},
+    {word:"Mouth",es:"Boca",emoji:"👄",ex:"Open your mouth."},
+    {word:"Medal",es:"Medalla",emoji:"🏅",ex:"She won a gold medal."},
+    {word:"Market",es:"Mercado",emoji:"🛒",ex:"We shop at the market."},
+    {word:"Mango",es:"Mango",emoji:"🥭",ex:"The mango is sweet and juicy."},
+    {word:"Motorcycle",es:"Moto",emoji:"🏍️",ex:"He rides a motorcycle."},
+    {word:"Museum",es:"Museo",emoji:"🏛️",ex:"We visited the museum."},
+    {word:"Mushroom",es:"Seta / Champiñón",emoji:"🍄",ex:"I add mushrooms to my pizza."},
+    {word:"Magazine",es:"Revista",emoji:"📰",ex:"She reads a fashion magazine."},
+    {word:"Magic",es:"Magia",emoji:"🪄",ex:"The show was pure magic."},
+    {word:"March",es:"Marzo",emoji:"🌿",ex:"Spring begins in March."},
+    {word:"Match",es:"Partido / Fósforo",emoji:"🔥",ex:"We won the match."},
+    {word:"Mayor",es:"Alcalde",emoji:"🏛️",ex:"The mayor opened the event."},
+    {word:"Medicine",es:"Medicina",emoji:"💊",ex:"Take your medicine."},
+    {word:"Meeting",es:"Reunión",emoji:"🤝",ex:"I have a meeting at ten."},
+    {word:"Memory",es:"Memoria / Recuerdo",emoji:"🧠",ex:"I have good memories."},
+    {word:"Menu",es:"Menú / Carta",emoji:"🍽️",ex:"Can I see the menu?"},
+    {word:"Message",es:"Mensaje",emoji:"💬",ex:"Send me a message."},
+    {word:"Midnight",es:"Medianoche",emoji:"🌙",ex:"We stayed up until midnight."},
+    {word:"Minute",es:"Minuto",emoji:"⏱️",ex:"Wait a minute."},
+    {word:"Mistake",es:"Error",emoji:"❌",ex:"Everyone makes mistakes."},
+    {word:"Money",es:"Dinero",emoji:"💰",ex:"I need more money."},
+    {word:"Morning",es:"Mañana",emoji:"🌅",ex:"Good morning!"},
+  ],
+  N: [
+    {word:"Night",es:"Noche",emoji:"🌃",ex:"The night is quiet."},
+    {word:"Nose",es:"Nariz",emoji:"👃",ex:"I smell with my nose."},
+    {word:"Nest",es:"Nido",emoji:"🪺",ex:"The bird sits in its nest."},
+    {word:"Noodle",es:"Fideo",emoji:"🍜",ex:"I like noodle soup."},
+    {word:"Nurse",es:"Enfermero/a",emoji:"👩‍⚕️",ex:"The nurse helps patients."},
+    {word:"Number",es:"Número",emoji:"🔢",ex:"My favorite number is seven."},
+    {word:"Needle",es:"Aguja",emoji:"🪡",ex:"Thread the needle carefully."},
+    {word:"Neck",es:"Cuello",emoji:"🦒",ex:"My neck is stiff."},
+    {word:"Net",es:"Red",emoji:"🥅",ex:"The ball went into the net."},
+    {word:"Newspaper",es:"Periódico",emoji:"📰",ex:"I read the newspaper every morning."},
+    {word:"Notebook",es:"Cuaderno",emoji:"📓",ex:"Write in your notebook."},
+    {word:"Nature",es:"Naturaleza",emoji:"🌿",ex:"I love spending time in nature."},
+    {word:"Name",es:"Nombre",emoji:"🏷️",ex:"What is your name?"},
+    {word:"Nation",es:"Nación / País",emoji:"🌐",ex:"Every nation has a flag."},
+    {word:"Navy",es:"Marina / Azul marino",emoji:"⚓",ex:"He serves in the navy."},
+    {word:"Neighbor",es:"Vecino/a",emoji:"🏘️",ex:"My neighbor is very friendly."},
+    {word:"New",es:"Nuevo/a",emoji:"✨",ex:"I have a new phone."},
+    {word:"Nice",es:"Agradable / Bonito",emoji:"😊",ex:"What a nice day!"},
+    {word:"Noon",es:"Mediodía",emoji:"🌞",ex:"We eat lunch at noon."},
+    {word:"North",es:"Norte",emoji:"🧭",ex:"Go north for ten miles."},
+    {word:"Note",es:"Nota",emoji:"📝",ex:"Write a note to remember."},
+    {word:"November",es:"Noviembre",emoji:"🍂",ex:"It gets cold in November."},
+    {word:"Nutrition",es:"Nutrición",emoji:"🥗",ex:"Good nutrition is important."},
+  ],
+  O: [
+    {word:"Ocean",es:"Océano",emoji:"🌊",ex:"The ocean is huge."},
+    {word:"Orange",es:"Naranja",emoji:"🍊",ex:"An orange is sweet."},
+    {word:"Owl",es:"Búho",emoji:"🦉",ex:"The owl sees at night."},
+    {word:"Open",es:"Abrir / Abierto",emoji:"🔓",ex:"Open the window, please."},
+    {word:"Oven",es:"Horno",emoji:"🫙",ex:"Bake the cake in the oven."},
+    {word:"Office",es:"Oficina",emoji:"🏢",ex:"I work in an office."},
+    {word:"Ostrich",es:"Avestruz",emoji:"🦤",ex:"The ostrich cannot fly."},
+    {word:"Onion",es:"Cebolla",emoji:"🧅",ex:"The onion makes me cry."},
+    {word:"Orchestra",es:"Orquesta",emoji:"🎻",ex:"The orchestra plays beautiful music."},
+    {word:"Otter",es:"Nutria",emoji:"🦦",ex:"The otter swims in the river."},
+    {word:"Oxygen",es:"Oxígeno",emoji:"💨",ex:"We need oxygen to breathe."},
+    {word:"Oak",es:"Roble",emoji:"🌳",ex:"The oak tree is very old."},
+    {word:"Oar",es:"Remo",emoji:"🚣",ex:"Row with the oar."},
+    {word:"Object",es:"Objeto",emoji:"📦",ex:"What is this object?"},
+    {word:"October",es:"Octubre",emoji:"🎃",ex:"Halloween is in October."},
+    {word:"Old",es:"Viejo/a / Antiguo",emoji:"🏛️",ex:"This building is very old."},
+    {word:"Olive",es:"Aceituna",emoji:"🫒",ex:"I love olives on my pizza."},
+    {word:"Only",es:"Solo / Único",emoji:"1️⃣",ex:"I am the only one here."},
+    {word:"Opinion",es:"Opinión",emoji:"💬",ex:"What is your opinion?"},
+    {word:"Opposite",es:"Opuesto / Enfrente",emoji:"↔️",ex:"The bank is opposite the school."},
+    {word:"Order",es:"Pedir / Orden",emoji:"📋",ex:"Can I order, please?"},
+    {word:"Outdoor",es:"Al aire libre",emoji:"🌳",ex:"I love outdoor activities."},
+    {word:"Outfit",es:"Atuendo / Ropa",emoji:"👗",ex:"She has a great outfit."},
+  ],
+  P: [
+    {word:"Pizza",es:"Pizza",emoji:"🍕",ex:"I love pizza with cheese."},
+    {word:"Penguin",es:"Pingüino",emoji:"🐧",ex:"The penguin lives in Antarctica."},
+    {word:"Pen",es:"Bolígrafo",emoji:"🖊️",ex:"Write with a pen."},
+    {word:"Park",es:"Parque",emoji:"🌳",ex:"I walk in the park."},
+    {word:"Phone",es:"Teléfono",emoji:"📱",ex:"Call me on my phone."},
+    {word:"Piano",es:"Piano",emoji:"🎹",ex:"She plays the piano."},
+    {word:"Plate",es:"Plato",emoji:"🍽️",ex:"Put the food on the plate."},
+    {word:"Pillow",es:"Almohada",emoji:"🛏️",ex:"My pillow is very soft."},
+    {word:"Pineapple",es:"Piña",emoji:"🍍",ex:"Pineapple is tropical fruit."},
+    {word:"Planet",es:"Planeta",emoji:"🪐",ex:"Saturn is a beautiful planet."},
+    {word:"Police",es:"Policía",emoji:"👮",ex:"The police protect the city."},
+    {word:"Potato",es:"Patata",emoji:"🥔",ex:"I like baked potato."},
+    {word:"Pocket",es:"Bolsillo",emoji:"👖",ex:"I keep my keys in my pocket."},
+    {word:"Puzzle",es:"Puzzle / Rompecabezas",emoji:"🧩",ex:"I love doing puzzles."},
+    {word:"Peach",es:"Melocotón",emoji:"🍑",ex:"The peach is soft and sweet."},
+    {word:"Paint",es:"Pintura / Pintar",emoji:"🎨",ex:"She likes to paint."},
+    {word:"Paper",es:"Papel",emoji:"📄",ex:"Write on the paper."},
+    {word:"Parrot",es:"Loro",emoji:"🦜",ex:"The parrot repeats words."},
+    {word:"Party",es:"Fiesta",emoji:"🎉",ex:"Let's have a party!"},
+    {word:"Passport",es:"Pasaporte",emoji:"🛂",ex:"Show your passport at the border."},
+    {word:"Patient",es:"Paciente",emoji:"🏥",ex:"Be patient, it takes time."},
+    {word:"Paw",es:"Pata / Garra",emoji:"🐾",ex:"The dog left paw prints."},
+    {word:"Peace",es:"Paz",emoji:"☮️",ex:"We all want peace."},
+    {word:"Pencil",es:"Lápiz",emoji:"✏️",ex:"Draw with a pencil."},
+    {word:"Perfect",es:"Perfecto/a",emoji:"✅",ex:"The weather is perfect today."},
+    {word:"Photo",es:"Foto",emoji:"📸",ex:"Take a photo here."},
+    {word:"Pilot",es:"Piloto",emoji:"👨‍✈️",ex:"The pilot lands the plane."},
+    {word:"Pirate",es:"Pirata",emoji:"🏴‍☠️",ex:"The pirate sails the seas."},
+    {word:"Poem",es:"Poema",emoji:"📜",ex:"She wrote a beautiful poem."},
+    {word:"Pool",es:"Piscina",emoji:"🏊",ex:"I swim in the pool."},
+  ],
+  Q: [
+    {word:"Queen",es:"Reina",emoji:"👸",ex:"The queen is elegant."},
+    {word:"Question",es:"Pregunta",emoji:"❓",ex:"I have a question."},
+    {word:"Quiet",es:"Silencioso / Tranquilo",emoji:"🤫",ex:"The library is quiet."},
+    {word:"Quick",es:"Rápido",emoji:"⚡",ex:"The rabbit is quick."},
+    {word:"Quilt",es:"Edredón",emoji:"🛏️",ex:"The quilt is warm."},
+    {word:"Quarter",es:"Cuarto / 25 centavos",emoji:"🪙",ex:"A quarter is 25 cents."},
+    {word:"Quality",es:"Calidad",emoji:"🏅",ex:"This product has great quality."},
+    {word:"Queue",es:"Cola / Fila",emoji:"🚶",ex:"Wait in the queue, please."},
+    {word:"Quiz",es:"Prueba / Cuestionario",emoji:"📝",ex:"We have a quiz today."},
+    {word:"Quit",es:"Dejar / Abandonar",emoji:"🚪",ex:"Don't quit, keep going!"},
+  ],
+  R: [
+    {word:"Rain",es:"Lluvia",emoji:"🌧️",ex:"I like the rain."},
+    {word:"Rabbit",es:"Conejo",emoji:"🐰",ex:"The rabbit is fluffy."},
+    {word:"Rainbow",es:"Arcoíris",emoji:"🌈",ex:"After rain comes a rainbow."},
+    {word:"River",es:"Río",emoji:"🏞️",ex:"The river flows to the sea."},
+    {word:"Rose",es:"Rosa",emoji:"🌹",ex:"A rose is a beautiful flower."},
+    {word:"Road",es:"Carretera / Camino",emoji:"🛣️",ex:"The road is long."},
+    {word:"Rocket",es:"Cohete",emoji:"🚀",ex:"The rocket goes to space."},
+    {word:"Ring",es:"Anillo",emoji:"💍",ex:"She wears a gold ring."},
+    {word:"Robot",es:"Robot",emoji:"🤖",ex:"The robot can talk."},
+    {word:"Rock",es:"Roca / Piedra",emoji:"🪨",ex:"The rock is very heavy."},
+    {word:"Roof",es:"Techo / Tejado",emoji:"🏠",ex:"The roof keeps us dry."},
+    {word:"Ruler",es:"Regla",emoji:"📏",ex:"Measure with a ruler."},
+    {word:"Restaurant",es:"Restaurante",emoji:"🍴",ex:"Let's eat at a restaurant."},
+    {word:"Rhino",es:"Rinoceronte",emoji:"🦏",ex:"The rhino has a big horn."},
+    {word:"Rope",es:"Cuerda",emoji:"🪢",ex:"Tie the rope tightly."},
+    {word:"Race",es:"Carrera",emoji:"🏁",ex:"She won the race."},
+    {word:"Radio",es:"Radio",emoji:"📻",ex:"I listen to the radio."},
+    {word:"Read",es:"Leer",emoji:"📖",ex:"I read every night."},
+    {word:"Ready",es:"Listo/a",emoji:"✅",ex:"Are you ready to go?"},
+    {word:"Recipe",es:"Receta",emoji:"🍳",ex:"Follow the recipe carefully."},
+    {word:"Red",es:"Rojo",emoji:"❤️",ex:"My favorite color is red."},
+    {word:"Relax",es:"Relajarse",emoji:"😌",ex:"Sit down and relax."},
+    {word:"Remember",es:"Recordar",emoji:"💭",ex:"Remember to call me."},
+    {word:"Repeat",es:"Repetir",emoji:"🔁",ex:"Repeat after me."},
+    {word:"Reply",es:"Responder / Respuesta",emoji:"↩️",ex:"I'll reply to your email."},
+    {word:"Rich",es:"Rico/a",emoji:"💰",ex:"He became very rich."},
+    {word:"Right",es:"Derecha / Correcto",emoji:"➡️",ex:"Turn right at the light."},
+    {word:"Room",es:"Habitación",emoji:"🛏️",ex:"My room is tidy."},
+    {word:"Round",es:"Redondo / Vuelta",emoji:"🔵",ex:"The ball is round."},
+    {word:"Run",es:"Correr",emoji:"🏃",ex:"I run every morning."},
+  ],
+  S: [
+    {word:"Sun",es:"Sol",emoji:"☀️",ex:"The sun is shining."},
+    {word:"Star",es:"Estrella",emoji:"⭐",ex:"The stars are beautiful at night."},
+    {word:"Snake",es:"Serpiente",emoji:"🐍",ex:"The snake is long."},
+    {word:"Shoe",es:"Zapato",emoji:"👟",ex:"I put on my shoes."},
+    {word:"Soup",es:"Sopa",emoji:"🍲",ex:"I eat hot soup."},
+    {word:"Sky",es:"Cielo",emoji:"🌤️",ex:"The sky is blue."},
+    {word:"School",es:"Escuela",emoji:"🏫",ex:"I go to school every day."},
+    {word:"Sheep",es:"Oveja",emoji:"🐑",ex:"The sheep has white wool."},
+    {word:"Ship",es:"Barco",emoji:"🚢",ex:"The ship crosses the ocean."},
+    {word:"Smile",es:"Sonrisa",emoji:"😊",ex:"She has a beautiful smile."},
+    {word:"Snow",es:"Nieve",emoji:"❄️",ex:"Snow falls in winter."},
+    {word:"Spider",es:"Araña",emoji:"🕷️",ex:"The spider makes a web."},
+    {word:"Spoon",es:"Cuchara",emoji:"🥄",ex:"Eat the soup with a spoon."},
+    {word:"Strawberry",es:"Fresa",emoji:"🍓",ex:"Strawberries are red and sweet."},
+    {word:"Supermarket",es:"Supermercado",emoji:"🛒",ex:"I buy food at the supermarket."},
+    {word:"Sad",es:"Triste",emoji:"😢",ex:"She feels sad today."},
+    {word:"Safe",es:"Seguro / Caja fuerte",emoji:"🔒",ex:"Keep your money safe."},
+    {word:"Salt",es:"Sal",emoji:"🧂",ex:"Add a pinch of salt."},
+    {word:"Sandwich",es:"Sándwich / Bocadillo",emoji:"🥪",ex:"I want a cheese sandwich."},
+    {word:"Saturday",es:"Sábado",emoji:"🎉",ex:"Saturday is my favorite day."},
+    {word:"Save",es:"Guardar / Salvar",emoji:"💾",ex:"Save your work often."},
+    {word:"Scared",es:"Asustado/a",emoji:"😨",ex:"I am scared of the dark."},
+    {word:"Science",es:"Ciencia",emoji:"🔬",ex:"Science explains the world."},
+    {word:"Screen",es:"Pantalla",emoji:"📺",ex:"The screen is bright."},
+    {word:"Sea",es:"Mar",emoji:"🌊",ex:"The sea is calm."},
+    {word:"Season",es:"Estación del año",emoji:"🍁",ex:"My favorite season is winter."},
+    {word:"Seed",es:"Semilla",emoji:"🌱",ex:"Plant the seed in the soil."},
+    {word:"September",es:"Septiembre",emoji:"🍂",ex:"School starts in September."},
+    {word:"Shadow",es:"Sombra",emoji:"🌑",ex:"I saw my shadow on the wall."},
+    {word:"Share",es:"Compartir",emoji:"🤝",ex:"Share your food with others."},
+  ],
+  T: [
+    {word:"Tree",es:"Árbol",emoji:"🌳",ex:"The tree is tall."},
+    {word:"Tiger",es:"Tigre",emoji:"🐯",ex:"The tiger is fast."},
+    {word:"Train",es:"Tren",emoji:"🚆",ex:"The train arrives at noon."},
+    {word:"Table",es:"Mesa",emoji:"🪑",ex:"Eat at the table."},
+    {word:"Tea",es:"Té",emoji:"🫖",ex:"I drink tea in the morning."},
+    {word:"Tooth",es:"Diente",emoji:"🦷",ex:"Brush your teeth."},
+    {word:"Turtle",es:"Tortuga",emoji:"🐢",ex:"The turtle is slow but steady."},
+    {word:"Thunder",es:"Trueno",emoji:"⛈️",ex:"The thunder was very loud."},
+    {word:"Ticket",es:"Entrada / Billete",emoji:"🎫",ex:"Buy a ticket for the show."},
+    {word:"Tomato",es:"Tomate",emoji:"🍅",ex:"The tomato is red."},
+    {word:"Torch",es:"Linterna / Antorcha",emoji:"🔦",ex:"Use the torch in the dark."},
+    {word:"Tower",es:"Torre",emoji:"🗼",ex:"The tower is very tall."},
+    {word:"Truck",es:"Camión",emoji:"🚚",ex:"The truck carries heavy loads."},
+    {word:"Trophy",es:"Trofeo",emoji:"🏆",ex:"She won the trophy."},
+    {word:"Towel",es:"Toalla",emoji:"🏖️",ex:"Dry yourself with a towel."},
+    {word:"Tail",es:"Cola / Rabo",emoji:"🐕",ex:"The dog wags its tail."},
+    {word:"Taste",es:"Sabor / Probar",emoji:"😋",ex:"This cake tastes great."},
+    {word:"Teacher",es:"Profesor/a",emoji:"👩‍🏫",ex:"My teacher is very kind."},
+    {word:"Team",es:"Equipo",emoji:"⚽",ex:"I am part of a great team."},
+    {word:"Telephone",es:"Teléfono",emoji:"☎️",ex:"Answer the telephone."},
+    {word:"Television",es:"Televisión",emoji:"📺",ex:"I watch TV at night."},
+    {word:"Temperature",es:"Temperatura",emoji:"🌡️",ex:"The temperature is 25 degrees."},
+    {word:"Tent",es:"Tienda de campaña",emoji:"⛺",ex:"We sleep in a tent."},
+    {word:"Thursday",es:"Jueves",emoji:"📅",ex:"I have class on Thursday."},
+    {word:"Tidy",es:"Ordenado/a",emoji:"🧹",ex:"Keep your room tidy."},
+    {word:"Time",es:"Tiempo / Hora",emoji:"⏰",ex:"What time is it?"},
+    {word:"Tired",es:"Cansado/a",emoji:"😴",ex:"I am so tired today."},
+    {word:"Today",es:"Hoy",emoji:"📅",ex:"What are you doing today?"},
+    {word:"Tomorrow",es:"Mañana",emoji:"🌅",ex:"See you tomorrow."},
+    {word:"Town",es:"Pueblo / Ciudad pequeña",emoji:"🏘️",ex:"I grew up in a small town."},
+  ],
+  U: [
+    {word:"Umbrella",es:"Paraguas",emoji:"☂️",ex:"Take your umbrella, it's raining."},
+    {word:"Uncle",es:"Tío",emoji:"👨",ex:"My uncle is funny."},
+    {word:"Up",es:"Arriba",emoji:"⬆️",ex:"Look up at the sky."},
+    {word:"Uniform",es:"Uniforme",emoji:"👔",ex:"Students wear a uniform."},
+    {word:"Universe",es:"Universo",emoji:"🌌",ex:"The universe is infinite."},
+    {word:"Ugly",es:"Feo/a",emoji:"😬",ex:"The monster is ugly."},
+    {word:"Useful",es:"Útil",emoji:"🛠️",ex:"This tool is very useful."},
+    {word:"Unique",es:"Único/a",emoji:"✨",ex:"Every person is unique."},
+    {word:"Understand",es:"Entender / Comprender",emoji:"🤔",ex:"Do you understand the lesson?"},
+    {word:"Upset",es:"Molesto / Disgustado",emoji:"😤",ex:"He is upset about the result."},
+    {word:"Update",es:"Actualizar",emoji:"🔄",ex:"Update your phone."},
+    {word:"Underground",es:"Subterráneo / Metro",emoji:"🚇",ex:"Take the underground."},
+    {word:"Uniform",es:"Uniforme",emoji:"👕",ex:"All students wear a uniform."},
+    {word:"Unit",es:"Unidad",emoji:"📐",ex:"A meter is a unit of length."},
+    {word:"Until",es:"Hasta",emoji:"⏳",ex:"Wait until tomorrow."},
+    {word:"Upload",es:"Subir / Cargar",emoji:"⬆️",ex:"Upload the photo to Instagram."},
+    {word:"Use",es:"Usar / Utilizar",emoji:"🛠️",ex:"Use a pencil to draw."},
+    {word:"Usually",es:"Normalmente / Generalmente",emoji:"🔁",ex:"I usually wake up at 7."},
+  ],
+  V: [
+    {word:"Violin",es:"Violín",emoji:"🎻",ex:"She plays the violin."},
+    {word:"Vegetables",es:"Verduras",emoji:"🥦",ex:"Eat your vegetables!"},
+    {word:"Village",es:"Pueblo",emoji:"🏘️",ex:"I live in a small village."},
+    {word:"Voice",es:"Voz",emoji:"🎤",ex:"She has a beautiful voice."},
+    {word:"Van",es:"Furgoneta",emoji:"🚐",ex:"The van is blue."},
+    {word:"Victory",es:"Victoria",emoji:"🏆",ex:"We celebrate our victory."},
+    {word:"Volcano",es:"Volcán",emoji:"🌋",ex:"The volcano erupted."},
+    {word:"Valley",es:"Valle",emoji:"🏔️",ex:"The valley is between two mountains."},
+    {word:"Vest",es:"Chaleco",emoji:"🦺",ex:"Wear a safety vest."},
+    {word:"Visit",es:"Visitar",emoji:"🗺️",ex:"We visit our grandparents on Sunday."},
+    {word:"Vacuum",es:"Aspiradora",emoji:"🧹",ex:"I vacuum the living room."},
+    {word:"Vitamin",es:"Vitamina",emoji:"💊",ex:"Take your vitamins every day."},
+    {word:"Value",es:"Valor",emoji:"💰",ex:"Education has great value."},
+    {word:"Vanilla",es:"Vainilla",emoji:"🍦",ex:"I like vanilla ice cream."},
+    {word:"Vehicle",es:"Vehículo",emoji:"🚗",ex:"A car is a vehicle."},
+    {word:"Video",es:"Video",emoji:"📹",ex:"Watch the video carefully."},
+    {word:"View",es:"Vista",emoji:"🏞️",ex:"The view from the top is amazing."},
+    {word:"Violet",es:"Violeta",emoji:"💜",ex:"The dress is violet."},
+    {word:"Virus",es:"Virus",emoji:"🦠",ex:"Wash your hands to stop the virus."},
+    {word:"Volcano",es:"Volcán",emoji:"🌋",ex:"The volcano erupted last year."},
+  ],
+  W: [
+    {word:"Water",es:"Agua",emoji:"💧",ex:"Drink water every day."},
+    {word:"Window",es:"Ventana",emoji:"🪟",ex:"Open the window."},
+    {word:"Wolf",es:"Lobo",emoji:"🐺",ex:"The wolf howls at the moon."},
+    {word:"Watch",es:"Reloj de pulsera",emoji:"⌚",ex:"I wear a watch."},
+    {word:"Wind",es:"Viento",emoji:"💨",ex:"The wind is strong today."},
+    {word:"Whale",es:"Ballena",emoji:"🐋",ex:"The whale is enormous."},
+    {word:"Wallet",es:"Cartera",emoji:"👛",ex:"I keep my cards in my wallet."},
+    {word:"Watermelon",es:"Sandía",emoji:"🍉",ex:"Watermelon is perfect in summer."},
+    {word:"Wrist",es:"Muñeca",emoji:"⌚",ex:"I hurt my wrist."},
+    {word:"Witch",es:"Bruja",emoji:"🧙",ex:"The witch rides a broom."},
+    {word:"Wood",es:"Madera",emoji:"🪵",ex:"The table is made of wood."},
+    {word:"Worm",es:"Gusano",emoji:"🪱",ex:"The worm lives in the soil."},
+    {word:"Weekend",es:"Fin de semana",emoji:"🎉",ex:"I relax on the weekend."},
+    {word:"Waterfall",es:"Cascada",emoji:"💦",ex:"The waterfall is amazing."},
+    {word:"Wrench",es:"Llave inglesa",emoji:"🔧",ex:"Fix it with a wrench."},
+    {word:"Walk",es:"Caminar",emoji:"🚶",ex:"I walk to school every day."},
+    {word:"Wall",es:"Pared / Muro",emoji:"🧱",ex:"The wall is thick."},
+    {word:"Warm",es:"Cálido / Tibio",emoji:"🌡️",ex:"The water is warm."},
+    {word:"Way",es:"Camino / Manera",emoji:"🛣️",ex:"Which way is the station?"},
+    {word:"Weak",es:"Débil",emoji:"😔",ex:"I feel weak today."},
+    {word:"Weather",es:"Tiempo (clima)",emoji:"🌦️",ex:"The weather is nice."},
+    {word:"Wednesday",es:"Miércoles",emoji:"📅",ex:"We meet on Wednesday."},
+    {word:"Week",es:"Semana",emoji:"📆",ex:"There are seven days in a week."},
+    {word:"Welcome",es:"Bienvenido/a",emoji:"🎉",ex:"Welcome to our school!"},
+    {word:"Wet",es:"Mojado/a",emoji:"💧",ex:"My shoes are wet."},
+    {word:"White",es:"Blanco",emoji:"⬜",ex:"The snow is white."},
+    {word:"Wild",es:"Salvaje",emoji:"🌿",ex:"Lions are wild animals."},
+    {word:"Win",es:"Ganar",emoji:"🏆",ex:"I want to win the game."},
+    {word:"Winter",es:"Invierno",emoji:"❄️",ex:"I love winter."},
+    {word:"Work",es:"Trabajar / Trabajo",emoji:"💼",ex:"I work from home."},
+  ],
+  X: [
+    {word:"Xylophone",es:"Xilófono",emoji:"🎵",ex:"Children play the xylophone."},
+    {word:"X-ray",es:"Radiografía",emoji:"🩻",ex:"The doctor looks at the X-ray."},
+    {word:"Xenon",es:"Xenón",emoji:"⚗️",ex:"Xenon is a noble gas."},
+    {word:"Xbox",es:"Xbox (consola)",emoji:"🎮",ex:"I play games on Xbox."},
+    {word:"Xerography",es:"Fotocopia",emoji:"🖨️",ex:"Make a xerography of the document."},
+  ],
+  Y: [
+    {word:"Yellow",es:"Amarillo",emoji:"💛",ex:"The sun is yellow."},
+    {word:"Yogurt",es:"Yogur",emoji:"🥛",ex:"I eat yogurt for breakfast."},
+    {word:"Year",es:"Año",emoji:"📅",ex:"Happy New Year!"},
+    {word:"Yard",es:"Patio / Jardín",emoji:"🌿",ex:"I play in the yard."},
+    {word:"Yawn",es:"Bostezar",emoji:"🥱",ex:"I yawn when I'm tired."},
+    {word:"Young",es:"Joven",emoji:"👦",ex:"She is young and energetic."},
+    {word:"Yacht",es:"Yate",emoji:"⛵",ex:"They sail on a yacht."},
+    {word:"Yell",es:"Gritar",emoji:"📢",ex:"Do not yell in the library."},
+    {word:"Yesterday",es:"Ayer",emoji:"📆",ex:"I saw her yesterday."},
+    {word:"Yolk",es:"Yema de huevo",emoji:"🍳",ex:"The yolk is yellow."},
+    {word:"Yet",es:"Todavía / Aún",emoji:"⏳",ex:"Are you ready yet?"},
+    {word:"You",es:"Tú / Usted / Vosotros",emoji:"👤",ex:"You are doing great!"},
+    {word:"Your",es:"Tu / Vuestro",emoji:"🏷️",ex:"What is your name?"},
+  ],
+  Z: [
+    {word:"Zebra",es:"Cebra",emoji:"🦓",ex:"The zebra has stripes."},
+    {word:"Zero",es:"Cero",emoji:"0️⃣",ex:"Zero is a number."},
+    {word:"Zoo",es:"Zoológico",emoji:"🦒",ex:"We visit the zoo on Sunday."},
+    {word:"Zip",es:"Cremallera",emoji:"🧥",ex:"Zip up your jacket."},
+    {word:"Zone",es:"Zona",emoji:"📍",ex:"This is a quiet zone."},
+    {word:"Zombie",es:"Zombi",emoji:"🧟",ex:"The zombie movie was scary."},
+    {word:"Zucchini",es:"Calabacín",emoji:"🥒",ex:"I cook zucchini with garlic."},
+    {word:"Zodiac",es:"Zodiaco",emoji:"♈",ex:"What is your zodiac sign?"},
+  ],
+};
+
+const letters = Object.keys(vocab);
+let currentIdx = 0;
+let revealed = {};
+let totalLearned = 0;
+
+// Count total words
+const totalWords = Object.values(vocab).reduce((s, a) => s + a.length, 0);
+document.getElementById('total-count').textContent = totalWords;
+
+// Speech
+let synth = window.speechSynthesis;
+let voices = [];
+let speechSupported = !!synth;
+let currentSpeakBtn = null;
+
+function loadVoices() {
+  voices = synth.getVoices();
+}
+if (speechSupported) {
+  loadVoices();
+  if (synth.onvoiceschanged !== undefined) synth.onvoiceschanged = loadVoices;
+  document.getElementById('speech-notice').textContent = '🔊 Toca el botón de sonido en cada tarjeta para escuchar la pronunciación';
+} else {
+  document.getElementById('speech-notice').textContent = '⚠️ Tu navegador no soporta pronunciación. Usa Chrome o Safari.';
+}
+
+function speak(word, btnEl) {
+  if (!speechSupported) return;
+  synth.cancel();
+  if (currentSpeakBtn) currentSpeakBtn.classList.remove('speaking');
+
+  const utter = new SpeechSynthesisUtterance(word);
+  utter.lang = 'en-US';
+  utter.rate = 0.85;
+  utter.pitch = 1;
+
+  // Try to get an English voice
+  const enVoice = voices.find(v => v.lang.startsWith('en'));
+  if (enVoice) utter.voice = enVoice;
+
+  btnEl.classList.add('speaking');
+  currentSpeakBtn = btnEl;
+
+  utter.onend = () => { btnEl.classList.remove('speaking'); currentSpeakBtn = null; };
+  utter.onerror = () => { btnEl.classList.remove('speaking'); currentSpeakBtn = null; };
+  synth.speak(utter);
+}
+
+function getRevealed(letter) {
+  if (!revealed[letter]) revealed[letter] = new Set();
+  return revealed[letter];
+}
+
+function renderNav() {
+  const nav = document.getElementById('letter-nav');
+  nav.innerHTML = letters.map((l, i) => {
+    const done = getRevealed(l).size === vocab[l].length;
+    const active = i === currentIdx;
+    return `<button class="letter-btn${active?' active':''}${done&&!active?' done':''}" onclick="selectLetter(${i})">${l}</button>`;
+  }).join('');
+  const btn = nav.querySelector('.active');
+  if (btn) btn.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
+}
+
+function renderWords() {
+  const letter = letters[currentIdx];
+  const words = vocab[letter];
+  const revSet = getRevealed(letter);
+  document.getElementById('section-title').textContent = `Letra ${letter} — ${words.length} palabras`;
+  document.getElementById('word-grid').innerHTML = words.map((w, i) => {
+    const isRev = revSet.has(i);
+    return `<div class="word-card${isRev?' revealed':''}" onclick="flipCard('${letter}',${i})">
+      <div>
+        <div class="card-top">
+          <span class="card-emoji">${w.emoji}</span>
+          <button class="speak-btn" id="sbtn-${i}" onclick="event.stopPropagation();speak('${w.word.replace(/'/g,"\\'")}',this)" title="Escuchar pronunciación">🔊</button>
+        </div>
+        <div class="card-word">${w.word}</div>
+        <div class="card-translation">${w.es}</div>
+        <div class="card-example">${w.ex}</div>
+        ${!isRev?'<div class="card-tap">Toca para traducción</div>':''}
+      </div>
+      <div class="card-check">✓</div>
+    </div>`;
+  }).join('');
+  updateProgress();
+}
+
+function flipCard(letter, i) {
+  const revSet = getRevealed(letter);
+  if (!revSet.has(i)) {
+    revSet.add(i);
+    totalLearned++;
+    document.getElementById('total-learned').textContent = totalLearned;
+    if (revSet.size === vocab[letter].length) showToast('¡Letra completada! 🎉');
+  } else {
+    revSet.delete(i);
+    totalLearned = Math.max(0, totalLearned - 1);
+    document.getElementById('total-learned').textContent = totalLearned;
+  }
+  renderWords();
+  renderNav();
+}
+
+function selectLetter(i) {
+  currentIdx = i;
+  renderNav();
+  renderWords();
+}
+
+function nextLetter() { if (currentIdx < letters.length-1) selectLetter(currentIdx+1); }
+function prevLetter() { if (currentIdx > 0) selectLetter(currentIdx-1); }
+
+function updateProgress() {
+  const pct = Math.round(((currentIdx+1)/letters.length)*100);
+  document.getElementById('progress').style.width = pct+'%';
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// Swipe
+let startX = 0;
+document.getElementById('word-grid').addEventListener('touchstart', e => { startX = e.touches[0].clientX; }, {passive:true});
+document.getElementById('word-grid').addEventListener('touchend', e => {
+  const diff = startX - e.changedTouches[0].clientX;
+  if (Math.abs(diff) > 60) diff > 0 ? nextLetter() : prevLetter();
+}, {passive:true});
+
+renderNav();
+renderWords();
+</script>
+</body>
+</html>
